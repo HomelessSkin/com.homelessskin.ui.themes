@@ -1,0 +1,17 @@
+{
+  "name": "com.homelessskin.ui.themes",
+  "displayName": "UI.Themes",
+  "version": "1.0.0",
+  "description": "ui.themes",
+  "author": {
+    "name": "RU_1n",
+    "email": "your@email.com"
+  },
+  "keywords": [
+    "ui.themes"
+  ],
+  "hideInEditor": false,
+  "dependencies": {
+    "com.unity.entities": "1.3.14"
+  }
+}
