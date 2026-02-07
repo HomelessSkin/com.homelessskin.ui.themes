@@ -8,36 +8,45 @@ using UnityEngine.Events;
 
 namespace UI.Themes
 {
+    #region DRAWER SETTINGS
     [CreateAssetMenu(fileName = "DrawerSettings", menuName = "UI/Themes/Drawer Settings")]
     public class DrawerSettings : ScriptableObject
     {
-
+        public string DefaultPath;
     }
+    #endregion
 
+    #region DRAWER
     public static class Drawer
     {
+        public static string LanguageKey;
         public static float CharacterSpacing;
         public static float WordSpacing;
-        public static string LanguageKey;
+        public static TMP_FontAsset FontAsset;
 
         static DrawerSettings Settings;
-        static TMP_FontAsset FontAsset;
-        static UnityEvent OnThemeChange = new UnityEvent();
+        static UnityEvent OnThemeChange;
         static Dictionary<string, Element.Data> ThemeData;
 
-        public static void Prepare(Manifest_V2 manifest, string path, bool fromResources)
+        public static void Prepare(DrawerSettings settings)
         {
-            if (ThemeData == null)
-                ThemeData = new Dictionary<string, Element.Data>();
-            else
-                ThemeData.Clear();
+            OnThemeChange = new UnityEvent();
+            ThemeData = new Dictionary<string, Element.Data>();
 
+            SetTheme(Manifest.Cast(Resources.Load<TextAsset>(settings.DefaultPath).text), settings.DefaultPath.Replace("manifest", ""), true);
+        }
+        public static void AddListener(UnityAction action) => OnThemeChange.AddListener(action);
+        public static void Invoke() => OnThemeChange.Invoke();
+        public static void RemoveListener(UnityAction action) => OnThemeChange.RemoveListener(action);
+        public static void SetTheme(Manifest_V2 manifest, string path, bool fromResources)
+        {
+            LanguageKey = GetLanguageKey();
             CharacterSpacing = manifest.font.characterSpacing;
             WordSpacing = manifest.font.wordSpacing;
-            LanguageKey = string.IsNullOrEmpty(manifest.languageKey) ? "default" : manifest.languageKey;
-            FontAsset = string.IsNullOrEmpty(manifest.font.assetName) ? TMP_Settings.defaultFontAsset : LoadFont();
+            FontAsset = LoadFont();
 
-            var color = manifest.font.color.ToColor();
+            //var color = manifest.font.color.ToColor();
+            var color = Color.black;
 
             if (manifest.icons != null)
                 for (int i = 0; i < manifest.icons.Length; i++)
@@ -68,8 +77,18 @@ namespace UI.Themes
                     ThemeData[info.key] = data;
                 }
 
+            string GetLanguageKey()
+            {
+                if (string.IsNullOrEmpty(manifest.languageKey))
+                    return "default";
+
+                return manifest.languageKey;
+            }
             TMP_FontAsset LoadFont()
             {
+                if (string.IsNullOrEmpty(manifest.font.assetName))
+                    return TMP_Settings.defaultFontAsset;
+
                 var result = TMP_Settings.defaultFontAsset;
                 var filePath = path + manifest.font.assetName;
 
@@ -166,7 +185,7 @@ namespace UI.Themes
                 };
             }
         }
-        public static void AddListener(UnityAction action) => OnThemeChange.AddListener(action);
-        public static void RemoveListener(UnityAction action) => OnThemeChange.RemoveListener(action);
+        public static bool TryGetData(string key, out Element.Data data) => ThemeData.TryGetValue(key, out data);
     }
+    #endregion
 }

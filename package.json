@@ -12,6 +12,8 @@
   ],
   "hideInEditor": false,
   "dependencies": {
-    "com.unity.entities": "1.3.14"
+    "com.unity.entities": "1.3.14",
+    "com.homelessskin.core": "1.0.0",
+    "com.homelessskin.ui": "1.0.0"
   }
 }

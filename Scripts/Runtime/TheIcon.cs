@@ -1,0 +1,58 @@
+using System;
+
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace UI.Themes
+{
+    [RequireComponent(typeof(Image)), DisallowMultipleComponent]
+    public class TheIcon : Element, IRedrawable
+    {
+        [SerializeField] bool NonRedrawable;
+        [SerializeField] Image Image;
+
+        Vector3 Origin;
+
+        protected override void Start()
+        {
+            InitOrigin();
+
+            base.Start();
+        }
+
+        public bool IsRedrawable() => !NonRedrawable;
+
+        public override void SetData(Data data)
+        {
+            if (data == null)
+                return;
+
+            var icon = data as IconData;
+            if (Image && icon.Sprite)
+                Image.sprite = icon.Sprite;
+        }
+
+        void InitOrigin()
+        {
+            if (Origin.magnitude > 0.00001f)
+                return;
+
+            Origin = Image.rectTransform.localPosition;
+        }
+
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+            Image = GetComponent<Image>();
+        }
+#endif
+
+        #region ICON DATA
+        [Serializable]
+        public class IconData : Data
+        {
+            public Sprite Sprite;
+        }
+        #endregion
+    }
+}
